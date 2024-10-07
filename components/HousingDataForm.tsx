@@ -234,7 +234,7 @@ const HousingDataForm = () => {
         </div>
      
       
-      <form onSubmit={handleSubmit} className="mb-2 p-5 bg-gray-50">
+      <form onSubmit={handleSubmit} className="mb-2 p-5 bg-gray-100">
    
         <div className="mb-4">
           <Label htmlFor="amount">Kaupverð:</Label>
@@ -243,15 +243,16 @@ const HousingDataForm = () => {
             type="text"
             value={amount}
             onChange={handleAmountChange}
-            placeholder="dæmi: 50.000.000"
+            placeholder="50.000.000"
             required
+            className=''
           />
         </div>
 
         <div className="mb-4 flex flex-row gap-x-3">
             <div className="basis-1/2">
             <Label htmlFor="year">Kaupár:</Label>
-            <Select value={year} onValueChange={setYear}>
+            <Select value={year} onValueChange={setYear} className='outline-none'>
                 <SelectTrigger>
                 <SelectValue placeholder="" />
                 </SelectTrigger>
@@ -265,7 +266,7 @@ const HousingDataForm = () => {
 
             <div className="basis-1/2">
             <Label htmlFor="month  inline-block">Kaupmánuður:</Label>
-            <Select value={month} onValueChange={setMonth}>
+            <Select value={month} onValueChange={setMonth} className='outline-none'>
                 <SelectTrigger>
                 <SelectValue placeholder="" />
                 </SelectTrigger>
