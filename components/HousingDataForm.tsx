@@ -16,7 +16,7 @@ import jsonData from '@/data/kaupvisitala.json';
 
 
 const generateYearOptions = () => {
-  const years = [];
+  const years: number[] = [];
   for (let year = 2020; year <= currentYear; year++) {
     years.push(year);
   }
@@ -68,7 +68,7 @@ const StatsDisplay = ({ indexStartValue, indexTodayValue, differencePercent, amo
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Vísitala byrjun", value: indexStartValue === 0 ? '-' : indexStartValue.toFixed(1) },
-          { label: "Vísitala í dag", value: indexTodayValue === 0 ? '-' : indexTodayValue.toFixed(1) },
+          { label: "Vsitala í dag", value: indexTodayValue === 0 ? '-' : indexTodayValue.toFixed(1) },
           { label: "Hækkun í %", value: differencePercent === 0 ? '-' : `${differencePercent.toFixed(1)}%` },
         ].map((stat, index) => (
           <Card key={index}>
@@ -113,7 +113,7 @@ const PriceIndexChart = ({ data }) => {
             domain={['dataMin', 'dataMax']}
           />
           <Tooltip 
-            formatter={(value) => [`${formatNumber(Math.round(value))} ISK`, "Price"]}
+            formatter={(value) => [`${formatNumber(Math.round(Number(value)))} ISK`, "Price"]}
             labelFormatter={(label) => `Date: ${label}`}
           />
           <Line type="monotone" dataKey="price" stroke="#8884d8" activeDot={{ r: 8 }} />
@@ -133,9 +133,10 @@ const HousingDataForm = () => {
     indexStartValue: 0,
     indexTodayValue: 0,
     differencePercent: 0,
-    amountToday: 0
+    amountToday: 0,
+    amountDifference: 0 // Add this line
   });
-  const [chartData, setChartData] = useState([]);
+  const [chartData, setChartData] = useState<Array<{ date: string; price: number }>>([]);
 
   const [isDataComplete, setIsDataComplete] = useState(false);
 
@@ -251,32 +252,36 @@ const HousingDataForm = () => {
 
         <div className="mb-4 flex flex-row gap-x-3">
             <div className="basis-1/2">
-            <Label htmlFor="year">Kaupár:</Label>
-            <Select value={year} onValueChange={setYear} className='outline-none'>
-                <SelectTrigger>
-                <SelectValue placeholder="" />
-                </SelectTrigger>
-                <SelectContent>
-                {generateYearOptions().map((y) => (
-                    <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
-                ))}
-                </SelectContent>
-            </Select>
+              <Label htmlFor="year">Kaupár:</Label>
+              <div className='outline-none'>
+                <Select value={year} onValueChange={setYear}>
+                  <SelectTrigger>
+                  <SelectValue placeholder="" />
+                  </SelectTrigger>
+                  <SelectContent>
+                  {generateYearOptions().map((y) => (
+                      <SelectItem key={y} value={y.toString()}>{y}</SelectItem>
+                  ))}
+                  </SelectContent>
+              </Select>
+              </div>
             </div>
 
             <div className="basis-1/2">
-            <Label htmlFor="month  inline-block">Kaupmánuður:</Label>
-            <Select value={month} onValueChange={setMonth} className='outline-none'>
-                <SelectTrigger>
-                <SelectValue placeholder="" />
-                </SelectTrigger>
-                <SelectContent>
-                {generateMonthOptions(year).map((m) => (
-                    <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
-                ))}
-                </SelectContent>
-            </Select>
-            </div>
+              <Label htmlFor="month" className="inline-block">Kaupmánuður:</Label>
+              <div className='outline-none'>
+                <Select value={month} onValueChange={setMonth}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {generateMonthOptions(year).map((m) => (
+                      <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+          </div>
         </div>
 
         
