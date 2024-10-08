@@ -12,7 +12,8 @@ const currentYear = currentDate.getFullYear();
 const currentMonth = currentDate.getMonth() + 1;
 
 // JSON data at the bottom of the file
-import jsonData from '@/data/kaupvisitala.json';
+import kaupVisitalaData from '@/data/kaupvisitala.json';
+import neysluVisitalaData from '@/data/neysluvisitala.json';
 
 
 const generateYearOptions = () => {
@@ -158,8 +159,8 @@ const HousingDataForm = () => {
     }
 
     const monthNumber = new Date(Date.parse(month + " 1, 2000")).getMonth() + 1;
-    const startEntry = jsonData.find(entry => entry.AR === parseInt(year) && entry.MANUDUR === monthNumber);
-    const endEntry = jsonData[jsonData.length - 1];
+    const startEntry = kaupVisitalaData.find(entry => entry.AR === parseInt(year) && entry.MANUDUR === monthNumber);
+    const endEntry = kaupVisitalaData[kaupVisitalaData.length - 1];
 
     console.log("startEntry", startEntry);
 
@@ -185,11 +186,11 @@ const HousingDataForm = () => {
       amountDifference
     });
 
-    const startIndex = jsonData.findIndex(entry => entry.AR === parseInt(year) && entry.MANUDUR === monthNumber);
+    const startIndex = kaupVisitalaData.findIndex(entry => entry.AR === parseInt(year) && entry.MANUDUR === monthNumber);
 
     // Calculate price progression for chart
     let currentAmount = parseFloat(amount.replace(/\./g, ''));
-    const chartData = jsonData.slice(startIndex).map((entry, index, array) => {
+    const chartData = kaupVisitalaData.slice(startIndex).map((entry, index, array) => {
       console.log("indexes", index, indexStartValue, indexTodayValue)  
       if (index === 0) {
         console.log("index === 0",  `${entry.AR}-${String(entry.MANUDUR).padStart(2, '0')}`)
