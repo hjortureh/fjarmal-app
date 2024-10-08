@@ -5,7 +5,9 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+
+import neysluvisitalaData from '@/data/neysluvisitala.json';
 
 const currentDate = new Date();
 const currentYear = currentDate.getFullYear();
@@ -13,7 +15,6 @@ const currentMonth = currentDate.getMonth() + 1;
 
 // JSON data at the bottom of the file
 import kaupVisitalaData from '@/data/kaupvisitala.json';
-import neysluVisitalaData from '@/data/neysluvisitala.json';
 
 
 const generateYearOptions = () => {
@@ -24,22 +25,22 @@ const generateYearOptions = () => {
   return years;
 };
 
-const generateMonthOptions = (selectedYear) => {
-  const months = [
-    {value: 'January', label: 'Janúar'},
-    {value: 'February', label: 'Febrúar'},
-    {value: 'March', label: 'Mars'},
-    {value: 'April', label: 'Apríl'},
-    {value: 'May', label: 'Maí'},
-    {value: 'June', label: 'Júní'},
-    {value: 'July', label: 'Júlí'},
-    {value: 'August', label: 'Ágúst'},
-    {value: 'September', label: 'September'},
-    {value: 'October', label: 'Október'},
-    {value: 'November', label: 'Nóvember'},
-    {value: 'December', label: 'Desember'}
-  ];
-  
+const months = [
+  {value: 'January', label: 'Janúar'},
+  {value: 'February', label: 'Febrúar'},
+  {value: 'March', label: 'Mars'},
+  {value: 'April', label: 'Apríl'},
+  {value: 'May', label: 'Maí'},
+  {value: 'June', label: 'Júní'},
+  {value: 'July', label: 'Júlí'},
+  {value: 'August', label: 'Ágúst'},
+  {value: 'September', label: 'September'},
+  {value: 'October', label: 'Október'},
+  {value: 'November', label: 'Nóvember'},
+  {value: 'December', label: 'Desember'}
+];
+
+const generateMonthOptions = (selectedYear) => {  
   if (parseInt(selectedYear) === currentYear) {
     return months.slice(0, currentMonth - 1);
   }
@@ -98,15 +99,36 @@ const StatsDisplay = ({ indexStartValue, indexTodayValue, differencePercent, amo
   );
 };
 
-const PriceIndexChart = ({ data }) => {
+const PriceIndexChart = ({ data, startAmount }) => {
   if (data.length === 0) {
     return <div className="w-full h-64 mt-8 flex items-center justify-center text-gray-400">No data available</div>;
   }
 
+  const startDate = data[0].date;
+  let neysluvisitalaStartValue = neysluvisitalaData.find(entry => `${entry.AR}-${String(entry.MANUDUR).padStart(2, '0')}` === startDate)?.VISITALA || 0;
+  let currentNeysluvisitalaAmount = startAmount;
+
+  const combinedData = data.map((entry, index) => {
+    const neysluvisitalaEntry = neysluvisitalaData.find(item => `${item.AR}-${String(item.MANUDUR).padStart(2, '0')}` === entry.date);
+    if (neysluvisitalaEntry) {
+      if (index > 0) {
+        const prevNeysluvisitalaEntry = neysluvisitalaData.find(item => `${item.AR}-${String(item.MANUDUR).padStart(2, '0')}` === data[index - 1].date);
+        if (prevNeysluvisitalaEntry) {
+          const indexChange = (neysluvisitalaEntry.VISITALA - prevNeysluvisitalaEntry.VISITALA) / prevNeysluvisitalaEntry.VISITALA;
+          currentNeysluvisitalaAmount *= (1 + indexChange);
+        }
+      }
+    }
+    return {
+      ...entry,
+      neysluvisitalaPrice: currentNeysluvisitalaAmount
+    };
+  });
+
   return (
     <div className="w-full h-64 mt-8">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+        <LineChart data={combinedData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="date" />
           <YAxis 
@@ -114,10 +136,15 @@ const PriceIndexChart = ({ data }) => {
             domain={['dataMin', 'dataMax']}
           />
           <Tooltip 
-            formatter={(value) => [`${formatNumber(Math.round(Number(value)))} ISK`, "Price"]}
-            labelFormatter={(label) => `Date: ${label}`}
+            formatter={(value, name, something) => [
+              `${formatNumber(Math.round(Number(value)))} ISK`, 
+              name === "Verðmat" ? "Verðmat" : "Verðbólga"
+            ]}
+            labelFormatter={(label) => `Dags: ${label}`}
           />
-          <Line type="monotone" dataKey="price" stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Legend />
+          <Line type="monotone" dataKey="price" name="Verðmat" stroke="#8884d8" activeDot={{ r: 8 }} />
+          <Line type="monotone" dataKey="neysluvisitalaPrice" name="Verðbólga" stroke="#bbb" strokeDasharray="5 5" dot={false} />
         </LineChart>
       </ResponsiveContainer>
     </div>
@@ -138,6 +165,7 @@ const HousingDataForm = () => {
     amountDifference: 0 // Add this line
   });
   const [chartData, setChartData] = useState<Array<{ date: string; price: number }>>([]);
+  const [priceIndexChart, setPriceIndexChart] = useState<React.ReactElement | null>(null);
 
   const [isDataComplete, setIsDataComplete] = useState(false);
 
@@ -210,6 +238,7 @@ const HousingDataForm = () => {
     });
     
     setChartData(chartData);
+    setPriceIndexChart(<PriceIndexChart data={chartData} startAmount={parseFloat(amount.replace(/\./g, ''))} />);
   };
 
   useEffect(() => {
@@ -232,7 +261,7 @@ const HousingDataForm = () => {
     <div className="max-w-2xl mx-auto bg-white rounded-lg border border-gray-100 my-10">
         <div className="p-5 mt-5 mb-10">
             <h2 className="text-2xl font-bold mb-2 text-center">Fasteignaverðmat</h2>
-            <p className="text-sm text-muted-foreground text-center">Samkvæmt vísitölu íbúðarverðs frá HMS sem er gefin út mánaðarlega.</p>
+            <p className="text-sm text-muted-foreground text-center">Samkvæmt vísitölu búðarverðs frá HMS sem er gefin út mánaðarlega.</p>
         </div>
      
       
@@ -322,7 +351,7 @@ const HousingDataForm = () => {
 
       <StatsDisplay {...stats} />
       
-      <PriceIndexChart data={chartData} />
+      {priceIndexChart}
     </div>
   );
 };
