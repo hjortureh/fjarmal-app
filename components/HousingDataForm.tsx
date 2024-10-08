@@ -68,7 +68,7 @@ const StatsDisplay = ({ indexStartValue, indexTodayValue, differencePercent, amo
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Vísitala byrjun", value: indexStartValue === 0 ? '-' : indexStartValue.toFixed(1) },
-          { label: "Vsitala í dag", value: indexTodayValue === 0 ? '-' : indexTodayValue.toFixed(1) },
+          { label: "Vísitala í dag", value: indexTodayValue === 0 ? '-' : indexTodayValue.toFixed(1) },
           { label: "Hækkun í %", value: differencePercent === 0 ? '-' : `${differencePercent.toFixed(1)}%` },
         ].map((stat, index) => (
           <Card key={index}>
