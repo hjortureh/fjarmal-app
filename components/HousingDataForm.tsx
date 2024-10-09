@@ -259,7 +259,7 @@ const HousingDataForm = () => {
     <div className="max-w-2xl mx-auto bg-white rounded-lg border border-gray-100">
         <div className="p-5 mt-5 mb-10">
             <h2 className="text-2xl font-bold mb-2 text-center">Verðmat á fasteign</h2>
-            <p className="text-sm text-muted-foreground text-center">Samkvæmt vísitölu búðarverðs sem er gefin út mánaðarlega af HMS.</p>
+            <p className="text-sm text-muted-foreground text-center">Samkvæmt vísitölu íbúðarverðs sem er gefin út mánaðarlega af HMS.</p>
         </div>
      
       
