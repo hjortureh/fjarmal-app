@@ -104,8 +104,6 @@ const PriceIndexChart = ({ data, startAmount }) => {
     return <div className="w-full h-64 mt-8 flex items-center justify-center text-gray-400">No data available</div>;
   }
 
-  const startDate = data[0].date;
-  let neysluvisitalaStartValue = neysluvisitalaData.find(entry => `${entry.AR}-${String(entry.MANUDUR).padStart(2, '0')}` === startDate)?.VISITALA || 0;
   let currentNeysluvisitalaAmount = startAmount;
 
   const combinedData = data.map((entry, index) => {
@@ -136,7 +134,7 @@ const PriceIndexChart = ({ data, startAmount }) => {
             domain={['dataMin', 'dataMax']}
           />
           <Tooltip 
-            formatter={(value, name, something) => [
+            formatter={(value, name) => [
               `${formatNumber(Math.round(Number(value)))} ISK`, 
               name === "Verðmat" ? "Verðmat" : "Verðbólga"
             ]}
@@ -164,6 +162,7 @@ const HousingDataForm = () => {
     amountToday: 0,
     amountDifference: 0 // Add this line
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [chartData, setChartData] = useState<Array<{ date: string; price: number }>>([]);
   const [priceIndexChart, setPriceIndexChart] = useState<React.ReactElement | null>(null);
 
@@ -237,7 +236,6 @@ const HousingDataForm = () => {
       }
     });
     
-    setChartData(chartData);
     setPriceIndexChart(<PriceIndexChart data={chartData} startAmount={parseFloat(amount.replace(/\./g, ''))} />);
   };
 
